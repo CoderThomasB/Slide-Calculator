@@ -70,6 +70,57 @@ int Lexical_Analyzers_Number(const char *To_Parse)
 	
 	return Token_lenth;
 }
+int Lexical_Analyzers_Operator(const char *To_Parse)
+{
+	int Token_lenth = 0;
+	bool Is;
+  Is = true;
+  while ((To_Parse[Token_lenth] == plus_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+    {
+      Token_lenth = Token_lenth + 1;
+    }
+  while ((To_Parse[Token_lenth] == minus_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+    {
+      Token_lenth = Token_lenth + 1;
+    }
+  while ((To_Parse[Token_lenth] == times_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+    {
+      Token_lenth = Token_lenth + 1;
+    }
+  while ((To_Parse[Token_lenth] == divide_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+    {
+      Token_lenth = Token_lenth + 1;
+    }
+
+	return Token_lenth;
+}
+void Lexical_Analyzers(const char *To_Parse){
+  int change = 0;
+  struct Token_Node *Head = NULL;
+  struct Token_Node **Now = Head;
+
+  // UNFINISHED
+  do {
+    //Now.next = malloc (sizeof (struct Token_Node))
+    change = 0;
+    change = change + Lexical_Analyzers_Number(To_Parse);
+    if(change == 0){
+      change = change + Lexical_Analyzers_Operator(To_Parse);
+    }
+    Now.Token_lenth = change;
+    Now.Token_start = To_Parse;
+
+    if(change != 0){
+      To_Parse = To_Parse + change;
+    }
+  } while (change != 0);
+
+
+  printf("%s\n", To_Parse);
+}
+
+
+
 
 
 bool Parse(enum Parse_Stuff To_Parse, const char *The_char)
@@ -268,7 +319,6 @@ void add_text_to_Screen(const gchar *input)
 
 const char * Calculate_Resolt(){
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
-	
 	
 	
 	//system("python3 -c \"print(1+1)\"");

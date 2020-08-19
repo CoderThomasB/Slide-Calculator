@@ -23,7 +23,7 @@ LDFLAGS=$(PTHREAD) $(GTKLIB) -export-dynamic
 OBJS=    main.o
 
 
-all: $(OBJS)
+all: gtk $(OBJS)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
 
 main.o: src/main.c
@@ -36,4 +36,7 @@ run: all
 	./$(TARGET) 
 
 install: run
+
+gtk:
+	sudo apt-get install libgtk-3-dev
 
