@@ -4,9 +4,9 @@ TARGET=slide-calculator.out
 # compiler
 CC=gcc
 # debug
-DEBUG=-g
+DEBUG=
 # optimisation
-OPT=
+OPT=-Ofast
 # warnings
 WARN=
 
@@ -27,7 +27,7 @@ all: $(OBJS)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
 
 main.o: src/main.c
-	$(CC) -c $(CCFLAGS) src/main.c $(GTKLIB) main.o
+	$(CC) -c $(CCFLAGS) src/main.c $(GTKLIB)  -o main.o
 	    
 clean:
 	rm -f *.o $(TARGET)

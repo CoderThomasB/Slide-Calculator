@@ -31,7 +31,6 @@ GtkWidget	*Button_plus;
 
 GtkBuilder	*Builder;
 
-
 enum Parse_Stuff {
 	Digit, Symbol, Number, Operator, Equation, Full,
 	Plus, Minus, Times, Divide
