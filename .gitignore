@@ -1,2 +1,4 @@
 main.o
 slide-calculator.out
+tags*
+src/tags*

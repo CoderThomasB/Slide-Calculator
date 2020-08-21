@@ -73,48 +73,50 @@ int Lexical_Analyzers_Operator(const char *To_Parse)
 {
 	int Token_lenth = 0;
 	bool Is;
-  Is = true;
-  while ((To_Parse[Token_lenth] == plus_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
-    {
-      Token_lenth = Token_lenth + 1;
-    }
-  while ((To_Parse[Token_lenth] == minus_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
-    {
-      Token_lenth = Token_lenth + 1;
-    }
-  while ((To_Parse[Token_lenth] == times_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
-    {
-      Token_lenth = Token_lenth + 1;
-    }
-  while ((To_Parse[Token_lenth] == divide_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
-    {
-      Token_lenth = Token_lenth + 1;
-    }
+	Is = true;
+	while ((To_Parse[Token_lenth] == plus_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+	{
+		Token_lenth = Token_lenth + 1;
+	}
+	while ((To_Parse[Token_lenth] == minus_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+	{
+		Token_lenth = Token_lenth + 1;
+	}
+	while ((To_Parse[Token_lenth] == times_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+	{
+		Token_lenth = Token_lenth + 1;
+	}
+	while ((To_Parse[Token_lenth] == divide_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+	{
+		Token_lenth = Token_lenth + 1;
+	}
 
 	return Token_lenth;
 }
+struct Token_Node* Set_Token_Node_To_Zero(struct Token_Node *The_Token_Node){
+	(The_Token_Node -> next) = NULL;
+	(The_Token_Node -> Token_start) = 0;
+	(The_Token_Node -> Token_lenth) = 0;
+}
+
+
 struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 	int change = 0;
 	struct Token_Node *Head = NULL;
 	struct Token_Node *Now = NULL;
 
 	Head = malloc (sizeof (struct Token_Node));
-	(Head -> next) = NULL;
-	(Head -> Token_start) = 0;
-	(Head -> Token_lenth) = 0;
+	Set_Token_Node_To_Zero(Head);
 
 	Now = Head;
-	(Now -> Token_start) = 0;
+
+
 	// UNFINISHED
 	do {
-		printf("To_Parse:%s\n", To_Parse);
-		printf("%p\n", Now);
 		if((Now -> Token_start) != 0){
 			(Now -> next) = malloc (sizeof (struct Token_Node));
 			Now = (Now -> next);
-			(Now -> next) = NULL;
-			(Now -> Token_start) = 0;
-			(Now -> Token_lenth) = 0;
+			Set_Token_Node_To_Zero(Now);
 		}
 		//Now.next = malloc (sizeof (struct Token_Node))
 		change = 0;
@@ -125,15 +127,12 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 		(Now -> Token_lenth) = change;
 		(Now -> Token_start) = To_Parse;
 
-		printf("%s\n", (Now -> Token_start));
-
 		if(change != 0){
 			To_Parse = To_Parse + change;
 		}
 
 	} while (change != 0);
 
-	printf("%p\n", Head);
 	return Head;
 }
 
@@ -341,18 +340,17 @@ const char * Calculate_Resolt(){
 	struct Token_Node *Head = Lexical_Analyzers (Screen_Text);
 	struct Token_Node *Now = Head;
 	
-	printf("%p\n", Head);
-	printf("%p\n", Now);
-	//printf("%i\n", (Head -> Token_lenth));
-	//printf("%i\n", (Now -> Token_lenth));
 
+	int i = 1;
 	while ((Now -> next) != 0)
 	{
+		printf("Token %i  :", i);
 		for (int x = 0; x < (Now -> Token_lenth); x++)
 		printf("%c", *((Now -> Token_start)+x));
 
 		printf("\n");
 		Now = (Now -> next);
+		i++;
 	}
 
 	//system("python3 -c \"print(1+1)\"");
