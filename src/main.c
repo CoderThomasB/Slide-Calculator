@@ -99,17 +99,22 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 	struct Token_Node *Now = NULL;
 
 	Head = malloc (sizeof (struct Token_Node));
-	memset(Head, 0, 1);
+	(Head -> next) = NULL;
+	(Head -> Token_start) = 0;
+	(Head -> Token_lenth) = 0;
 
 	Now = Head;
-
+	(Now -> Token_start) = 0;
 	// UNFINISHED
 	do {
 		printf("To_Parse:%s\n", To_Parse);
-		if(Now -> Token_start != NULL){
-			Now -> next = malloc (sizeof (struct Token_Node));
-			memset(Now -> next, 0, sizeof (struct Token_Node));
-
+		printf("%p\n", Now);
+		if((Now -> Token_start) != 0){
+			(Now -> next) = malloc (sizeof (struct Token_Node));
+			Now = (Now -> next);
+			(Now -> next) = NULL;
+			(Now -> Token_start) = 0;
+			(Now -> Token_lenth) = 0;
 		}
 		//Now.next = malloc (sizeof (struct Token_Node))
 		change = 0;
@@ -117,8 +122,10 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 		if(change == 0){
 			change = change + Lexical_Analyzers_Operator(To_Parse);
 		}
-		Now -> Token_lenth = change;
-		Now -> Token_start = To_Parse;
+		(Now -> Token_lenth) = change;
+		(Now -> Token_start) = To_Parse;
+
+		printf("%s\n", (Now -> Token_start));
 
 		if(change != 0){
 			To_Parse = To_Parse + change;
@@ -126,7 +133,7 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 
 	} while (change != 0);
 
-
+	printf("%p\n", Head);
 	return Head;
 }
 
@@ -334,13 +341,18 @@ const char * Calculate_Resolt(){
 	struct Token_Node *Head = Lexical_Analyzers (Screen_Text);
 	struct Token_Node *Now = Head;
 	
-	while (Now -> next != NULL)
+	printf("%p\n", Head);
+	printf("%p\n", Now);
+	//printf("%i\n", (Head -> Token_lenth));
+	//printf("%i\n", (Now -> Token_lenth));
+
+	while ((Now -> next) != 0)
 	{
-		for (int i = 0; i < 20; i++){
-			printf("%c", *((Now -> Token_start) + i));
-		}
+		for (int x = 0; x < (Now -> Token_lenth); x++)
+		printf("%c", *((Now -> Token_start)+x));
+
 		printf("\n");
-		Now = Now -> next;
+		Now = (Now -> next);
 	}
 
 	//system("python3 -c \"print(1+1)\"");
