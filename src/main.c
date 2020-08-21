@@ -45,11 +45,10 @@ static const char times_str[] = "×\0";
 static const char divide_str[] = "÷\0";
 
 struct Token_Node { 
-	char *Token_start;
+	const char *Token_start;
 	int Token_lenth;
 	struct Token_Node *next; 
 }; 
-
 
 
 int Lexical_Analyzers_Number(const char *To_Parse)
@@ -94,29 +93,41 @@ int Lexical_Analyzers_Operator(const char *To_Parse)
 
 	return Token_lenth;
 }
-void Lexical_Analyzers(const char *To_Parse){
-  int change = 0;
-  struct Token_Node *Head = NULL;
-  struct Token_Node **Now = Head;
+struct Token_Node* Lexical_Analyzers(const char *To_Parse){
+	int change = 0;
+	struct Token_Node *Head = NULL;
+	struct Token_Node *Now = NULL;
 
-  // UNFINISHED
-  do {
-    //Now.next = malloc (sizeof (struct Token_Node))
-    change = 0;
-    change = change + Lexical_Analyzers_Number(To_Parse);
-    if(change == 0){
-      change = change + Lexical_Analyzers_Operator(To_Parse);
-    }
-    Now.Token_lenth = change;
-    Now.Token_start = To_Parse;
+	Head = malloc (sizeof (struct Token_Node));
+	memset(Head, 0, 1);
 
-    if(change != 0){
-      To_Parse = To_Parse + change;
-    }
-  } while (change != 0);
+	Now = Head;
+
+	// UNFINISHED
+	do {
+		printf("To_Parse:%s\n", To_Parse);
+		if(Now -> Token_start != NULL){
+			Now -> next = malloc (sizeof (struct Token_Node));
+			memset(Now -> next, 0, sizeof (struct Token_Node));
+
+		}
+		//Now.next = malloc (sizeof (struct Token_Node))
+		change = 0;
+		change = change + Lexical_Analyzers_Number(To_Parse);
+		if(change == 0){
+			change = change + Lexical_Analyzers_Operator(To_Parse);
+		}
+		Now -> Token_lenth = change;
+		Now -> Token_start = To_Parse;
+
+		if(change != 0){
+			To_Parse = To_Parse + change;
+		}
+
+	} while (change != 0);
 
 
-  printf("%s\n", To_Parse);
+	return Head;
 }
 
 
@@ -320,7 +331,18 @@ void add_text_to_Screen(const gchar *input)
 const char * Calculate_Resolt(){
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
 	
+	struct Token_Node *Head = Lexical_Analyzers (Screen_Text);
+	struct Token_Node *Now = Head;
 	
+	while (Now -> next != NULL)
+	{
+		for (int i = 0; i < 20; i++){
+			printf("%c", *((Now -> Token_start) + i));
+		}
+		printf("\n");
+		Now = Now -> next;
+	}
+
 	//system("python3 -c \"print(1+1)\"");
 	//execlp(python_command, python_command, "-c", "print('hi')", NULL);
 	
