@@ -110,7 +110,6 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 
 	Now = Head;
 
-
 	// UNFINISHED
 	do {
 		if((Now -> Token_start) != 0){
