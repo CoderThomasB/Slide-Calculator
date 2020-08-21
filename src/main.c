@@ -104,7 +104,6 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 	(Head -> Token_lenth) = 0;
 
 	Now = Head;
-	(Now -> Token_start) = 0;
 	// UNFINISHED
 	do {
 		printf("To_Parse:%s\n", To_Parse);
