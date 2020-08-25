@@ -31,9 +31,9 @@ GtkWidget	*Button_plus;
 
 GtkBuilder	*Builder;
 
-enum Parse_Stuff {
-	Digit, Symbol, Number, Operator, Equation, Full,
-	Plus, Minus, Times, Divide
+
+enum Token_types {
+	Number, Plus, Minus, Times, Divide
 };
 
 static const char Digits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
@@ -46,52 +46,65 @@ static const char divide_str[] = "÷\0";
 
 struct Token_Node { 
 	const char *Token_start;
+	enum Token_types Token_type;
 	int Token_lenth;
 	struct Token_Node *next; 
+};
+
+struct Token_Return {
+	enum Token_types Token_type;
+	int Token_lenth;
 }; 
 
+const char* Get_Name_Of_Token_type(enum Token_types Token_type);
 
-int Lexical_Analyzers_Number(const char *To_Parse)
+struct Token_Return Lexical_Analyzers_Number(const char *To_Parse)
 {
-	int Token_lenth = 0;
+	struct Token_Return T_Return;
+	T_Return.Token_lenth = 0;
 	bool Is = false;
 	do {
 		Is = false;
 		for ( int i = 0; i < 10 ; i++ )
 		{
-			Is = (To_Parse[Token_lenth] == Digits[i]) || Is;
+			Is = (To_Parse[T_Return.Token_lenth] == Digits[i]) || Is;
 		}
 		if(Is)
 		{
-			Token_lenth = Token_lenth + 1;
+			T_Return.Token_lenth = T_Return.Token_lenth + 1;
 		}
-	} while( Is && (To_Parse[Token_lenth] != '\000'));
+	} while( Is && (To_Parse[T_Return.Token_lenth] != '\000'));
 	
-	return Token_lenth;
+	return T_Return;
 }
-int Lexical_Analyzers_Operator(const char *To_Parse)
+struct Token_Return Lexical_Analyzers_Operator(const char *To_Parse)
 {
-	int Token_lenth = 0;
+	struct Token_Return T_Return;
+	T_Return.Token_lenth = 0;
 	bool Is;
 	Is = true;
-	while ((To_Parse[Token_lenth] == plus_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+	while ((To_Parse[T_Return.Token_lenth] == plus_str[T_Return.Token_lenth])&&To_Parse[T_Return.Token_lenth] != '\000' )
 	{
-		Token_lenth = Token_lenth + 1;
+		T_Return.Token_lenth = T_Return.Token_lenth + 1;
+		T_Return.Token_type = Plus;
 	}
-	while ((To_Parse[Token_lenth] == minus_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+	while ((To_Parse[T_Return.Token_lenth] == minus_str[T_Return.Token_lenth])&&To_Parse[T_Return.Token_lenth] != '\000' )
 	{
-		Token_lenth = Token_lenth + 1;
+		T_Return.Token_lenth = T_Return.Token_lenth + 1;
+		T_Return.Token_type = Minus;
 	}
-	while ((To_Parse[Token_lenth] == times_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+	while ((To_Parse[T_Return.Token_lenth] == times_str[T_Return.Token_lenth])&&To_Parse[T_Return.Token_lenth] != '\000' )
 	{
-		Token_lenth = Token_lenth + 1;
+		T_Return.Token_lenth = T_Return.Token_lenth + 1;
+		T_Return.Token_type = Times;
 	}
-	while ((To_Parse[Token_lenth] == divide_str[Token_lenth])&&To_Parse[Token_lenth] != '\000' )
+	while ((To_Parse[T_Return.Token_lenth] == divide_str[T_Return.Token_lenth])&&To_Parse[T_Return.Token_lenth] != '\000' )
 	{
-		Token_lenth = Token_lenth + 1;
+		T_Return.Token_lenth = T_Return.Token_lenth + 1;
+		T_Return.Token_type = Divide;
 	}
 
-	return Token_lenth;
+	return T_Return;
 }
 struct Token_Node* Set_Token_Node_To_Zero(struct Token_Node *The_Token_Node){
 	(The_Token_Node -> next) = NULL;
@@ -104,11 +117,14 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 	int change = 0;
 	struct Token_Node *Head = NULL;
 	struct Token_Node *Now = NULL;
+	enum Token_types Type;
+	struct Token_Return _;
 
 	Head = malloc (sizeof (struct Token_Node));
 	Set_Token_Node_To_Zero(Head);
 
 	Now = Head;
+
 
 	// UNFINISHED
 	do {
@@ -119,12 +135,18 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 		}
 		//Now.next = malloc (sizeof (struct Token_Node))
 		change = 0;
-		change = change + Lexical_Analyzers_Number(To_Parse);
+		_ = Lexical_Analyzers_Number(To_Parse);
+		change = change + _.Token_lenth;
+		Type = _.Token_type;
+		Type = Number;
 		if(change == 0){
-			change = change + Lexical_Analyzers_Operator(To_Parse);
+			_ = Lexical_Analyzers_Operator(To_Parse);
+			change = change + _.Token_lenth;
+			Type = _.Token_type;
 		}
 		(Now -> Token_lenth) = change;
 		(Now -> Token_start) = To_Parse;
+		(Now -> Token_type) = Type;
 
 		if(change != 0){
 			To_Parse = To_Parse + change;
@@ -139,96 +161,71 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 
 
 
-bool Parse(enum Parse_Stuff To_Parse, const char *The_char)
+int Parse(struct Token_Node * Token_Start)
 {
-	bool Is = false;
-	int i = 0;
-	switch (To_Parse)
-		{
-			
-			case Number:
-				
-				Is = (Lexical_Analyzers_Number(The_char) >= 1);
-				
-			break;
-			
-			case Operator:
-				
-				if (Parse (Symbol, The_char))
-				{
-					if(Parse (Number, The_char))
-					{
-						Is = true;
-					}
-				}
-				
-			break;
-			
-			case Digit:
-				for ( int i = 0; i < 10 ; i++ )
-				{
-					Is = (The_char[0] == Digits[i]) || Is;
-				}
-			break;
-			
-			case Symbol:
-				
-				Is = Parse (Plus, The_char) || Is;
-				if(Is == false){Is = Parse (Minus, The_char);}
-				if(Is == false){Is = Parse (Times, The_char);}
-				if(Is == false){Is = Parse (Divide, The_char);}
-				
-			break;
-			
+	struct Token_Node* P[50]; // the number befor is macked not the operater
+	struct Token_Node* M[50]; // the number befor is macked not the operater
+	struct Token_Node* T[50]; // the number befor is macked not the operater
+	struct Token_Node* D[50]; // the number befor is macked not the operater
+	int P_No = 0; // the number befor is macked not the operater
+	int M_No = 0; // the number befor is macked not the operater
+	int T_No = 0; // the number befor is macked not the operater
+	int D_No = 0; // the number befor is macked not the operater
+	struct Token_Node *Token_Now = Token_Start; // this is away one behind because we need to know the first nubber
+
+	for ( int i = 0; i < 50; i++ ) {
+		P[i] = NULL; /* set element at location i to i + 100 */
+	}
+	for ( int i = 0; i < 50; i++ ) {
+		M[i] = NULL; /* set element at location i to i + 100 */
+	}
+	for ( int i = 0; i < 50; i++ ) {
+		T[i] = NULL; /* set element at location i to i + 100 */
+	}
+	for ( int i = 0; i < 50; i++ ) {
+		D[i] = NULL; /* set element at location i to i + 100 */
+	}
+
+
+
+	while (((Token_Now -> next) -> next) != NULL)
+	{
+		switch ((Token_Now -> next) -> Token_type)
+			{
 			case Plus:
-				printf("%s\n","Plus");
-				for ( int i = 0; i < strlen(plus_str) ; i++ )
-				{
-					Is = (The_char[i] == plus_str[i]);
-					
-				}
-				if(Is){printf("Symbol Lenth:%lu\n", strlen(times_str));}
-			break;
-			
+
+				P[P_No] = Token_Now;
+				P_No++;
+				break;
 			case Minus:
-				printf("%s\n","Minus");
-				for ( int i = 0; i < strlen(minus_str) ; i++ )
-				{
-					Is = (The_char[i] == minus_str[i]);
-					
-				}
-				if(Is){printf("Symbol Lenth:%lu\n", strlen(times_str));}
-			break;
-			
+
+				M[M_No] = Token_Now;
+				M_No++;
+				break;
 			case Times:
-				printf("%s\n","Times");
-				for ( int i = 0; i < strlen(times_str) ; i++ )
-				{
-					Is = (The_char[i] == times_str[i]);
-					
-				}
-				if(Is){printf("Symbol Lenth:%lu\n", strlen(times_str));}
-			break;
-			
+
+				T[T_No] = Token_Now;
+				T_No++;
+				break;
 			case Divide:
-				printf("%s\n","Divide");
-				for ( int i = 0; i < strlen(divide_str) ; i++ )
-				{
-					Is = (The_char[i] == divide_str[i]);
-					
-				}
-				if(Is){printf("Symbol Lenth:%lu\n", strlen(times_str));}
-			break;
 
+				T[T_No] = Token_Now;
+				T_No++;
+				break;
+			}
+		Token_Now = (Token_Now -> next);
+	}
 
-		}
-	return Is;
+	for ( int i = 0; i < P_No; i++ ) {
+		//printf("\n%p\n", (P[i]));
+		printf("\n");
+		for (int x = 0; x < ((P[i] -> next) -> Token_lenth); x++){
+				printf("%c", *(((P[i] -> next) -> Token_start)+x));
+			}
+		printf("\n");
+	}
+
 }
-
-
-char *python_command = "python3\0";
-
-//const int Max_Size = 100; "error: variable-sized object may not be initialized"
 
 
 int main (int argc, char **argv){
@@ -332,6 +329,17 @@ void add_text_to_Screen(const gchar *input)
 	// We Are Done !!!!
 	return;
 }
+const char* Get_Name_Of_Token_type(enum Token_types Token_type){
+	switch (Token_type)
+		{
+		case Plus: return "Plus";
+		case Minus: return "Minus";
+		case Times: return "Times";
+		case Divide: return "Divide";
+		case Number: return "Number";
+		default: return "";
+		}
+}
 
 const char * Calculate_Resolt(){
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
@@ -340,17 +348,19 @@ const char * Calculate_Resolt(){
 	struct Token_Node *Now = Head;
 	
 
-	int i = 1;
+	/*int i = 1;
 	while ((Now -> next) != 0)
 	{
-		printf("Token %i  :", i);
+		printf("Token %i %s :", i, Get_Name_Of_Token_type(Now -> Token_type));
 		for (int x = 0; x < (Now -> Token_lenth); x++)
 		printf("%c", *((Now -> Token_start)+x));
 
 		printf("\n");
 		Now = (Now -> next);
 		i++;
-	}
+	}*/
+
+	Parse(Head);
 
 	//system("python3 -c \"print(1+1)\"");
 	//execlp(python_command, python_command, "-c", "print('hi')", NULL);
