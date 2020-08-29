@@ -6,7 +6,7 @@ CC=gcc
 # debug
 DEBUG=
 # optimisation
-OPT=-Ofast
+OPT=-Ofast -pipe
 # warnings
 WARN=
 
@@ -25,6 +25,7 @@ OBJS=    main.o
 
 all: $(OBJS)
 	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
+	echo "Done"
 
 main.o: src/main.c
 	$(CC) -c $(CCFLAGS) src/main.c $(GTKLIB)  -o main.o

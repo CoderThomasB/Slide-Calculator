@@ -45,10 +45,9 @@ static const char times_str[] = "×\0";
 static const char divide_str[] = "÷\0";
 
 struct Token_Node { 
-	const char *Token_start;
+	char *Token_start;
 	enum Token_types Token_type;
-	int Token_lenth;
-	struct Token_Node *next; 
+	struct Token_Node *next;
 };
 
 struct Token_Return {
@@ -56,6 +55,8 @@ struct Token_Return {
 	int Token_lenth;
 }; 
 
+const char* Get_Name_Of_Token_type(enum Token_types Token_type);
+int Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator);
 const char* Get_Name_Of_Token_type(enum Token_types Token_type);
 
 struct Token_Return Lexical_Analyzers_Number(const char *To_Parse)
@@ -77,6 +78,7 @@ struct Token_Return Lexical_Analyzers_Number(const char *To_Parse)
 	
 	return T_Return;
 }
+
 struct Token_Return Lexical_Analyzers_Operator(const char *To_Parse)
 {
 	struct Token_Return T_Return;
@@ -106,14 +108,70 @@ struct Token_Return Lexical_Analyzers_Operator(const char *To_Parse)
 
 	return T_Return;
 }
+
+int Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator){
+
+	// NOT FINISHED
+	if(Number1.Token_type != Number){
+		printf("Number1 not Number\n");
+		printf("Number1 is a %s\n", Get_Name_Of_Token_type (Number1.Token_type));
+		return -1;
+	}
+	if(Number2.Token_type != Number){
+		printf("Number2 not Number\n");
+		printf("Number2 is a %s\n", Get_Name_Of_Token_type (Number2.Token_type));
+		return -1;
+	}
+	if(The_Operator.Token_type == Number){
+		printf("The_Operator is Number\n");
+		printf("The_Operator is a %s\n", Get_Name_Of_Token_type (The_Operator.Token_type));
+		return -1;
+	}
+
+
+	printf("Number1.Token_start: %s\n", Number1.Token_start);
+	printf("Number2.Token_start: %s\n", Number2.Token_start);
+
+
+	int int_Number1 = atoi(Number1.Token_start);
+
+
+	int int_Number2 = atoi(Number2.Token_start);
+
+	printf("Number1: %i\n", int_Number1);
+	printf("Number2: %i\n", int_Number2);
+
+	switch (The_Operator.Token_type)
+		{
+		case Number:
+			printf("The_Operator is not Number\n");
+			return -1;
+			break;
+		case Times:
+			return int_Number1 * int_Number2;
+			break;
+		case Divide:
+			return int_Number1 / int_Number2;
+			break;
+		case Plus:
+			return int_Number1 + int_Number2;
+			break;
+		case Minus:
+			return int_Number1 - int_Number2;
+			break;
+
+	}
+}
+
 struct Token_Node* Set_Token_Node_To_Zero(struct Token_Node *The_Token_Node){
 	(The_Token_Node -> next) = NULL;
 	(The_Token_Node -> Token_start) = 0;
-	(The_Token_Node -> Token_lenth) = 0;
 }
 
 
 struct Token_Node* Lexical_Analyzers(const char *To_Parse){
+	//(char *) malloc(Output_Size * sizeof(char));
+
 	int change = 0;
 	struct Token_Node *Head = NULL;
 	struct Token_Node *Now = NULL;
@@ -144,8 +202,12 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 			change = change + _.Token_lenth;
 			Type = _.Token_type;
 		}
-		(Now -> Token_lenth) = change;
-		(Now -> Token_start) = To_Parse;
+
+
+		(Now -> Token_start) = malloc (sizeof (char) * (change + 1));
+		memset((Now -> Token_start), '\000', change + 1);
+		strncpy((Now -> Token_start), To_Parse, change);
+
 		(Now -> Token_type) = Type;
 
 		if(change != 0){
@@ -163,67 +225,19 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 
 int Parse(struct Token_Node * Token_Start)
 {
-	struct Token_Node* P[50]; // the number befor is macked not the operater
-	struct Token_Node* M[50]; // the number befor is macked not the operater
-	struct Token_Node* T[50]; // the number befor is macked not the operater
-	struct Token_Node* D[50]; // the number befor is macked not the operater
-	int P_No = 0; // the number befor is macked not the operater
-	int M_No = 0; // the number befor is macked not the operater
-	int T_No = 0; // the number befor is macked not the operater
-	int D_No = 0; // the number befor is macked not the operater
 	struct Token_Node *Token_Now = Token_Start; // this is away one behind because we need to know the first nubber
-
-	for ( int i = 0; i < 50; i++ ) {
-		P[i] = NULL; /* set element at location i to i + 100 */
-	}
-	for ( int i = 0; i < 50; i++ ) {
-		M[i] = NULL; /* set element at location i to i + 100 */
-	}
-	for ( int i = 0; i < 50; i++ ) {
-		T[i] = NULL; /* set element at location i to i + 100 */
-	}
-	for ( int i = 0; i < 50; i++ ) {
-		D[i] = NULL; /* set element at location i to i + 100 */
-	}
 
 
 
 	while (((Token_Now -> next) -> next) != NULL)
 	{
-		switch ((Token_Now -> next) -> Token_type)
-			{
-			case Plus:
-
-				P[P_No] = Token_Now;
-				P_No++;
-				break;
-			case Minus:
-
-				M[M_No] = Token_Now;
-				M_No++;
-				break;
-			case Times:
-
-				T[T_No] = Token_Now;
-				T_No++;
-				break;
-			case Divide:
-
-				T[T_No] = Token_Now;
-				T_No++;
-				break;
-			}
-		Token_Now = (Token_Now -> next);
+		int Reolt = Canclate_Reolt_From_Token(*Token_Now, *((Token_Now -> next) -> next), *(Token_Now -> next));
+		if(Reolt != -1){
+			printf("%i\n", Reolt);
+		}
 	}
 
-	for ( int i = 0; i < P_No; i++ ) {
-		//printf("\n%p\n", (P[i]));
-		printf("\n");
-		for (int x = 0; x < ((P[i] -> next) -> Token_lenth); x++){
-				printf("%c", *(((P[i] -> next) -> Token_start)+x));
-			}
-		printf("\n");
-	}
+
 
 }
 
@@ -233,7 +247,7 @@ int main (int argc, char **argv){
 	
 	// We are just geting started!
 	gtk_init(&argc, &argv);
-	
+
 	// read the glade file
 	Builder = gtk_builder_new_from_file("glade/Main.glade");
 	
@@ -245,7 +259,7 @@ int main (int argc, char **argv){
 	Buttons = GTK_WIDGET(gtk_builder_get_object(Builder, "Buttons"));
 	Label_Equals = GTK_WIDGET(gtk_builder_get_object(Builder, "Label Equals"));
 	Top = GTK_WIDGET(gtk_builder_get_object(Builder, "Top"));
-	
+
 	//                                   ||
 	// is thare a beter way to do this ? \/
 	//
@@ -264,10 +278,9 @@ int main (int argc, char **argv){
 	Button_equals = GTK_WIDGET(gtk_builder_get_object(Builder, "Button ="));
 	Button_minus = GTK_WIDGET(gtk_builder_get_object(Builder, "Button −"));
 	Button_plus = GTK_WIDGET(gtk_builder_get_object(Builder, "Button +"));
-	
+
 	// connects the signals
 	gtk_builder_connect_signals(Builder, NULL);
-	
 	// I Don't know what this is ???
 	g_object_unref(Builder);
 
@@ -278,7 +291,6 @@ int main (int argc, char **argv){
 	gtk_main();
 
 	return 0;
-	
 }
 
 // Exits if the window is closed or DESTROYED!
@@ -291,41 +303,41 @@ void on_window_main_destroy()
 
 void add_text_to_Screen(const gchar *input)
 {
-	//	reads the charters of the Screen
+	// reads the charters of the Screen
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
 	
 	// Gets the lenth of the exseted output
 	int Output_Size = strlen(gtk_entry_get_text(GTK_ENTRY(Screen))) + strlen(input) + 1;
-	
-	
+
+
 	// Crats a Bufer
 	 
 	// this code is not dynamic
 	// char text[100] = "";
 	char *text = (char *) malloc(Output_Size * sizeof(char));
-	
+
 	// a test for success!
-	if (text == NULL) { 
-		printf("Memory not allocated.\n"); 
-		return; 
-	} 
+	if (text == NULL) {
+		printf("Memory not allocated.\n");
+		return;
+	}
 	
 	memset(text, 0, Output_Size);
 	
 	// appends the Screen_Text
 	strcat(text, Screen_Text);
-	
+
 	// appends the input
 	strcat(text, input);
-	
+
 	printf("OutPut:%s\n", text);
-	
+
 	// writs the Buffer / output to the screen
 	gtk_entry_set_text(GTK_ENTRY(Screen), text);
 	
 	// frees the memory cativerty in our programe
 	free(text);
-	
+
 	// We Are Done !!!!
 	return;
 }
@@ -343,10 +355,10 @@ const char* Get_Name_Of_Token_type(enum Token_types Token_type){
 
 const char * Calculate_Resolt(){
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
-	
+
 	struct Token_Node *Head = Lexical_Analyzers (Screen_Text);
 	struct Token_Node *Now = Head;
-	
+
 
 	/*int i = 1;
 	while ((Now -> next) != 0)
@@ -364,7 +376,7 @@ const char * Calculate_Resolt(){
 
 	//system("python3 -c \"print(1+1)\"");
 	//execlp(python_command, python_command, "-c", "print('hi')", NULL);
-	
+
 	return Screen_Text;
 }
 
