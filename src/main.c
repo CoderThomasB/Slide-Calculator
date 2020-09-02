@@ -1,3 +1,6 @@
+/*  COPYRIGT Thomas booker 2020
+ *  All Rigtes rezered
+ */
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h> 
@@ -28,6 +31,9 @@ GtkWidget	*Button_time;
 GtkWidget	*Button_equals;
 GtkWidget	*Button_minus;
 GtkWidget	*Button_plus;
+GtkWidget	*Button_Back;
+GtkWidget	*Button_CE;
+
 
 GtkBuilder	*Builder;
 
@@ -223,22 +229,54 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 
 
 
-int Parse(struct Token_Node * Token_Start)
+struct Token_Node *Parse(struct Token_Node * Token_Start)
 {
 	struct Token_Node *Token_Now = Token_Start; // this is away one behind because we need to know the first nubber
 
 
 
-	while (((Token_Now -> next) -> next) != NULL)
+	while (((Token_Now -> next)) != NULL)
 	{
+		if(((Token_Now -> next) -> next) == NULL){
+			Token_Now = Token_Now -> next;
+			continue;
+		}
 		int Reolt = Canclate_Reolt_From_Token(*Token_Now, *((Token_Now -> next) -> next), *(Token_Now -> next));
 		if(Reolt != -1){
 			printf("%i\n", Reolt);
+			struct Token_Node *_ = ((Token_Now -> next) -> next) -> next;
+			printf("((Token_Now -> next) -> next) -> Token_start\n");
+			free(((Token_Now -> next) -> next) -> Token_start);
+			printf("((Token_Now -> next) -> next)\n");
+			free(((Token_Now -> next) -> next));
+			printf("(Token_Now -> next) -> Token_start\n");
+			free((Token_Now -> next) -> Token_start);
+			printf("(Token_Now -> next)\n");
+			free((Token_Now -> next));
+			printf("Token_Now -> Token_start\n");
+			free(Token_Now -> Token_start);
+			printf("Done\n");
+
+			(Token_Now -> next) = _;
+			(Token_Now -> Token_type) = Number;
+			(Token_Now -> Token_start) = malloc(sizeof (char) * 100);
+			printf("Done2\n");
+
+
+			sprintf((Token_Now -> Token_start), "%i", Reolt);
+			//itoa(Reolt, (Token_Now -> Token_start), 10);
+		}else{
+			Token_Now = Token_Now -> next;
 		}
 	}
 
-
-
+	Token_Now = Token_Start;
+	while ((Token_Now -> next) != NULL)
+	{
+		printf("%s\n", Token_Now -> Token_start);
+		Token_Now = Token_Now -> next;
+	}
+  return Token_Start;
 }
 
 
@@ -278,6 +316,8 @@ int main (int argc, char **argv){
 	Button_equals = GTK_WIDGET(gtk_builder_get_object(Builder, "Button ="));
 	Button_minus = GTK_WIDGET(gtk_builder_get_object(Builder, "Button −"));
 	Button_plus = GTK_WIDGET(gtk_builder_get_object(Builder, "Button +"));
+	Button_Back = GTK_WIDGET(gtk_builder_get_object(Builder, "Button Back"));
+	Button_CE = GTK_WIDGET(gtk_builder_get_object(Builder, "Button CE"));
 
 	// connects the signals
 	gtk_builder_connect_signals(Builder, NULL);
@@ -353,46 +393,48 @@ const char* Get_Name_Of_Token_type(enum Token_types Token_type){
 		}
 }
 
-const char * Calculate_Resolt(){
+char * Calculate_Resolt(){
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
 
 	struct Token_Node *Head = Lexical_Analyzers (Screen_Text);
 	struct Token_Node *Now = Head;
 
+	struct Token_Node *Output = Parse(Head);
 
-	/*int i = 1;
-	while ((Now -> next) != 0)
-	{
-		printf("Token %i %s :", i, Get_Name_Of_Token_type(Now -> Token_type));
-		for (int x = 0; x < (Now -> Token_lenth); x++)
-		printf("%c", *((Now -> Token_start)+x));
-
-		printf("\n");
-		Now = (Now -> next);
-		i++;
-	}*/
-
-	Parse(Head);
-
-	//system("python3 -c \"print(1+1)\"");
-	//execlp(python_command, python_command, "-c", "print('hi')", NULL);
-
-	return Screen_Text;
+	return (Output->Token_start);
 }
 
-
-
-void show_Answer(const gchar *The_Answer){
+void show_Answer(char *The_Answer){
 	gtk_widget_show_all(Top);
 	gtk_label_set_text(GTK_LABEL(Answer), The_Answer);
 }
 
+
 //                                   ||
 // is thare a beter way to do this ? \/
+
+void on_Button_Ans_clicked()
+{
+	const gchar *Answer_Text = gtk_label_get_text(GTK_LABEL(Answer));
+	gtk_entry_set_text (GTK_ENTRY (Screen), Answer_Text);
+}
+
 void on_Button_equals_clicked()
 {
-	const char *Resolt = Calculate_Resolt();
+	char *Resolt = Calculate_Resolt();
 	show_Answer(Resolt);
+}
+
+void on_Button_Back_clicked()
+{
+	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
+
+	gtk_entry_set_text(GTK_ENTRY(Screen), Screen_Text);
+}
+
+void on_Button_CE_clicked()
+{
+	gtk_entry_set_text(GTK_ENTRY(Screen), "");
 }
 
 void on_Button_divide_clicked()

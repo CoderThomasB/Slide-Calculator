@@ -6,7 +6,7 @@ CC=gcc
 # debug
 DEBUG=
 # optimisation
-OPT=-Ofast -pipe
+OPT= -pipe -Ofast
 # warnings
 WARN=
 
