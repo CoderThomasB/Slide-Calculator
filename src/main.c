@@ -33,16 +33,18 @@ GtkWidget	*Button_minus;
 GtkWidget	*Button_plus;
 GtkWidget	*Button_Back;
 GtkWidget	*Button_CE;
+GtkWidget	*Button_Dot;
 
 
 GtkBuilder	*Builder;
 
 
 enum Token_types {
-	Number, Plus, Minus, Times, Divide
+	Number, Plus, Minus, Times, Divide, Error
 };
 
-static const char Digits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+int Digits_Loop = 11;
+static const char Digits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'};
 
 // if you change the I also suggest doing a search and replas Just in case ;)
 static const char plus_str[] = "+\0";
@@ -51,9 +53,15 @@ static const char times_str[] = "×\0";
 static const char divide_str[] = "÷\0";
 
 struct Token_Node { 
+  // null termernatedm string
 	char *Token_start;
 	enum Token_types Token_type;
 	struct Token_Node *next;
+};
+
+struct Token_atrbutes {
+  int Token_lenth;
+  enum Token_types Token_type;
 };
 
 struct Token_Return {
@@ -62,60 +70,61 @@ struct Token_Return {
 }; 
 
 const char* Get_Name_Of_Token_type(enum Token_types Token_type);
-int Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator);
+float Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator);
 const char* Get_Name_Of_Token_type(enum Token_types Token_type);
 
-struct Token_Return Lexical_Analyzers_Number(const char *To_Parse)
+struct Token_atrbutes Lexical_Analyzers_Number(const char *To_Parse)
 {
-	struct Token_Return T_Return;
-	T_Return.Token_lenth = 0;
+	struct Token_atrbutes atrbutes;
+	atrbutes.Token_lenth = 0;
+  atrbutes.Token_type = Number;
 	bool Is = false;
 	do {
 		Is = false;
-		for ( int i = 0; i < 10 ; i++ )
+		for ( int i = 0; i < Digits_Loop; i++ )
 		{
-			Is = (To_Parse[T_Return.Token_lenth] == Digits[i]) || Is;
+			Is = (To_Parse[atrbutes.Token_lenth] == Digits[i]) || Is;
 		}
 		if(Is)
 		{
-			T_Return.Token_lenth = T_Return.Token_lenth + 1;
+			atrbutes.Token_lenth = atrbutes.Token_lenth + 1;
 		}
-	} while( Is && (To_Parse[T_Return.Token_lenth] != '\000'));
-	
-	return T_Return;
+	} while( Is && (To_Parse[atrbutes.Token_lenth] != '\000'));
+
+	return atrbutes;
 }
 
-struct Token_Return Lexical_Analyzers_Operator(const char *To_Parse)
+struct Token_atrbutes Lexical_Analyzers_Operator(const char *To_Parse)
 {
-	struct Token_Return T_Return;
-	T_Return.Token_lenth = 0;
+	struct Token_atrbutes atrbutes;
+	atrbutes.Token_lenth = 0;
 	bool Is;
 	Is = true;
-	while ((To_Parse[T_Return.Token_lenth] == plus_str[T_Return.Token_lenth])&&To_Parse[T_Return.Token_lenth] != '\000' )
+	while ((To_Parse[atrbutes.Token_lenth] == plus_str[atrbutes.Token_lenth])&&To_Parse[atrbutes.Token_lenth] != '\000' )
 	{
-		T_Return.Token_lenth = T_Return.Token_lenth + 1;
-		T_Return.Token_type = Plus;
+		atrbutes.Token_lenth = atrbutes.Token_lenth + 1;
+		atrbutes.Token_type = Plus;
 	}
-	while ((To_Parse[T_Return.Token_lenth] == minus_str[T_Return.Token_lenth])&&To_Parse[T_Return.Token_lenth] != '\000' )
+	while ((To_Parse[atrbutes.Token_lenth] == minus_str[atrbutes.Token_lenth])&&To_Parse[atrbutes.Token_lenth] != '\000' )
 	{
-		T_Return.Token_lenth = T_Return.Token_lenth + 1;
-		T_Return.Token_type = Minus;
+		atrbutes.Token_lenth = atrbutes.Token_lenth + 1;
+		atrbutes.Token_type = Minus;
 	}
-	while ((To_Parse[T_Return.Token_lenth] == times_str[T_Return.Token_lenth])&&To_Parse[T_Return.Token_lenth] != '\000' )
+	while ((To_Parse[atrbutes.Token_lenth] == times_str[atrbutes.Token_lenth])&&To_Parse[atrbutes.Token_lenth] != '\000' )
 	{
-		T_Return.Token_lenth = T_Return.Token_lenth + 1;
-		T_Return.Token_type = Times;
+		atrbutes.Token_lenth = atrbutes.Token_lenth + 1;
+		atrbutes.Token_type = Times;
 	}
-	while ((To_Parse[T_Return.Token_lenth] == divide_str[T_Return.Token_lenth])&&To_Parse[T_Return.Token_lenth] != '\000' )
+	while ((To_Parse[atrbutes.Token_lenth] == divide_str[atrbutes.Token_lenth])&&To_Parse[atrbutes.Token_lenth] != '\000' )
 	{
-		T_Return.Token_lenth = T_Return.Token_lenth + 1;
-		T_Return.Token_type = Divide;
+		atrbutes.Token_lenth = atrbutes.Token_lenth + 1;
+		atrbutes.Token_type = Divide;
 	}
 
-	return T_Return;
+	return atrbutes;
 }
 
-int Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator){
+float Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator){
 
 	// NOT FINISHED
 	if(Number1.Token_type != Number){
@@ -139,10 +148,10 @@ int Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number
 	printf("Number2.Token_start: %s\n", Number2.Token_start);
 
 
-	int int_Number1 = atoi(Number1.Token_start);
+	float int_Number1 = atof(Number1.Token_start);
 
 
-	int int_Number2 = atoi(Number2.Token_start);
+	float int_Number2 = atof(Number2.Token_start);
 
 	printf("Number1: %i\n", int_Number1);
 	printf("Number2: %i\n", int_Number2);
@@ -157,6 +166,9 @@ int Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number
 			return int_Number1 * int_Number2;
 			break;
 		case Divide:
+		if(int_Number2 == 0){
+			return -2;
+		}
 			return int_Number1 / int_Number2;
 			break;
 		case Plus:
@@ -181,6 +193,9 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 	int change = 0;
 	struct Token_Node *Head = NULL;
 	struct Token_Node *Now = NULL;
+  struct Token_atrbutes atrbutes;
+  atrbutes.Token_lenth = 0;
+  atrbutes.Token_type = Number;
 	enum Token_types Type;
 	struct Token_Return _;
 
@@ -192,21 +207,20 @@ struct Token_Node* Lexical_Analyzers(const char *To_Parse){
 
 	// UNFINISHED
 	do {
-		if((Now -> Token_start) != 0){
+		if((Now -> Token_start) != NULL){
 			(Now -> next) = malloc (sizeof (struct Token_Node));
 			Now = (Now -> next);
 			Set_Token_Node_To_Zero(Now);
 		}
 		//Now.next = malloc (sizeof (struct Token_Node))
 		change = 0;
-		_ = Lexical_Analyzers_Number(To_Parse);
-		change = change + _.Token_lenth;
-		Type = _.Token_type;
-		Type = Number;
+		atrbutes = Lexical_Analyzers_Number(To_Parse);
+		change = change + atrbutes.Token_lenth;
+		Type = atrbutes.Token_type;
 		if(change == 0){
-			_ = Lexical_Analyzers_Operator(To_Parse);
-			change = change + _.Token_lenth;
-			Type = _.Token_type;
+			atrbutes = Lexical_Analyzers_Operator(To_Parse);
+			change = change + atrbutes.Token_lenth;
+			Type = atrbutes.Token_type;
 		}
 
 
@@ -241,9 +255,9 @@ struct Token_Node *Parse(struct Token_Node * Token_Start)
 			Token_Now = Token_Now -> next;
 			continue;
 		}
-		int Reolt = Canclate_Reolt_From_Token(*Token_Now, *((Token_Now -> next) -> next), *(Token_Now -> next));
-		if(Reolt != -1){
-			printf("%i\n", Reolt);
+		float Reolt = Canclate_Reolt_From_Token(*Token_Now, *((Token_Now -> next) -> next), *(Token_Now -> next));
+		if(Reolt != -1 && Reolt != -2){
+			printf("%f\n", Reolt);
 			struct Token_Node *_ = ((Token_Now -> next) -> next) -> next;
 			printf("((Token_Now -> next) -> next) -> Token_start\n");
 			free(((Token_Now -> next) -> next) -> Token_start);
@@ -259,13 +273,20 @@ struct Token_Node *Parse(struct Token_Node * Token_Start)
 
 			(Token_Now -> next) = _;
 			(Token_Now -> Token_type) = Number;
-			(Token_Now -> Token_start) = malloc(sizeof (char) * 100);
+			(Token_Now -> Token_start) = malloc(sizeof (char) * 1000);
 			printf("Done2\n");
 
 
-			sprintf((Token_Now -> Token_start), "%i", Reolt);
+			sprintf((Token_Now -> Token_start), "%.3f", Reolt);
 			//itoa(Reolt, (Token_Now -> Token_start), 10);
-		}else{
+		}else if(Reolt == -1){
+			Token_Now = Token_Now -> next;
+		}else if(Reolt == -2){
+			free(Token_Now -> Token_start);
+			(Token_Now -> Token_start) = malloc (sizeof(char)*5);
+			(Token_Now -> Token_start) = "Error";
+			(Token_Now -> Token_type) = Error;
+
 			Token_Now = Token_Now -> next;
 		}
 	}
@@ -318,6 +339,7 @@ int main (int argc, char **argv){
 	Button_plus = GTK_WIDGET(gtk_builder_get_object(Builder, "Button +"));
 	Button_Back = GTK_WIDGET(gtk_builder_get_object(Builder, "Button Back"));
 	Button_CE = GTK_WIDGET(gtk_builder_get_object(Builder, "Button CE"));
+	Button_Dot = GTK_WIDGET(gtk_builder_get_object(Builder, "Button ."));
 
 	// connects the signals
 	gtk_builder_connect_signals(Builder, NULL);
@@ -412,6 +434,9 @@ void show_Answer(char *The_Answer){
 
 //                                   ||
 // is thare a beter way to do this ? \/
+void on_Button_Dot_clicked(){
+	add_text_to_Screen(".");
+}
 
 void on_Button_Ans_clicked()
 {
