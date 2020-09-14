@@ -6,6 +6,7 @@
 #include <stdlib.h> 
 #include <string.h>
 #include <stdbool.h> 
+#include <math.h>
 
 GtkWidget	*Main_Window;
 GtkWidget	*Main_Top;
@@ -40,7 +41,10 @@ GtkBuilder	*Builder;
 
 
 enum Token_types {
-	Number, Plus, Minus, Times, Divide, Error
+	Number, Plus, Minus, Times, Divide, Mod, Error
+};
+enum sucses_types {
+	maths_sucses, maths_invalid, maths_Error
 };
 
 int Digits_Loop = 11;
@@ -51,8 +55,14 @@ static const char plus_str[] = "+\0";
 static const char minus_str[] = "−\0";
 static const char times_str[] = "×\0";
 static const char divide_str[] = "÷\0";
+static const char mod_str[] = "%\0";
 
-struct Token_Node { 
+struct To_return {
+	float number;
+	enum sucses_types sucses;
+};
+
+struct Token_Node {
   // null termernatedm string
 	char *Token_start;
 	enum Token_types Token_type;
@@ -70,14 +80,13 @@ struct Token_Return {
 }; 
 
 const char* Get_Name_Of_Token_type(enum Token_types Token_type);
-float Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator);
+struct To_return Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator);
 const char* Get_Name_Of_Token_type(enum Token_types Token_type);
 
-struct Token_atrbutes Lexical_Analyzers_Number(const char *To_Parse)
-{
+struct Token_atrbutes Lexical_Analyzers_Number(const char *To_Parse){
 	struct Token_atrbutes atrbutes;
 	atrbutes.Token_lenth = 0;
-  atrbutes.Token_type = Number;
+	atrbutes.Token_type = Number;
 	bool Is = false;
 	do {
 		Is = false;
@@ -120,27 +129,36 @@ struct Token_atrbutes Lexical_Analyzers_Operator(const char *To_Parse)
 		atrbutes.Token_lenth = atrbutes.Token_lenth + 1;
 		atrbutes.Token_type = Divide;
 	}
+	while ((To_Parse[atrbutes.Token_lenth] == mod_str[atrbutes.Token_lenth])&&To_Parse[atrbutes.Token_lenth] != '\000' )
+	{
+		atrbutes.Token_lenth = atrbutes.Token_lenth + 1;
+		atrbutes.Token_type = Mod;
+	}
 
 	return atrbutes;
 }
 
-float Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator){
+struct To_return Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Number2,struct Token_Node The_Operator){
+	struct To_return the_return;
 
 	// NOT FINISHED
 	if(Number1.Token_type != Number){
 		printf("Number1 not Number\n");
 		printf("Number1 is a %s\n", Get_Name_Of_Token_type (Number1.Token_type));
-		return -1;
+		the_return.sucses = maths_invalid;
+		return the_return;
 	}
 	if(Number2.Token_type != Number){
 		printf("Number2 not Number\n");
 		printf("Number2 is a %s\n", Get_Name_Of_Token_type (Number2.Token_type));
-		return -1;
+		the_return.sucses = maths_invalid;
+		return the_return;
 	}
 	if(The_Operator.Token_type == Number){
 		printf("The_Operator is Number\n");
 		printf("The_Operator is a %s\n", Get_Name_Of_Token_type (The_Operator.Token_type));
-		return -1;
+		the_return.sucses = maths_invalid;
+		return the_return;
 	}
 
 
@@ -160,22 +178,37 @@ float Canclate_Reolt_From_Token(struct Token_Node Number1,struct Token_Node Numb
 		{
 		case Number:
 			printf("The_Operator is not Number\n");
-			return -1;
+			the_return.sucses = maths_invalid;
+			return the_return;
 			break;
 		case Times:
-			return int_Number1 * int_Number2;
+			the_return.sucses = maths_sucses;
+			the_return.number = int_Number1 * int_Number2;
+			return the_return;
 			break;
 		case Divide:
-		if(int_Number2 == 0){
-			return -2;
-		}
-			return int_Number1 / int_Number2;
+			if(int_Number2 == 0){
+				the_return.sucses = maths_Error;
+				return the_return;
+			}
+			the_return.sucses = maths_sucses;
+			the_return.number = int_Number1 / int_Number2;
+			return the_return;
 			break;
 		case Plus:
-			return int_Number1 + int_Number2;
+			the_return.sucses = maths_sucses;
+			the_return.number = int_Number1 + int_Number2;
+			return the_return;
 			break;
 		case Minus:
-			return int_Number1 - int_Number2;
+			the_return.sucses = maths_sucses;
+			the_return.number = int_Number1 - int_Number2;
+			return the_return;
+			break;
+		case Mod:
+			the_return.sucses = maths_sucses;
+			the_return.number = ((int)int_Number1) % ((int)int_Number2);
+			return the_return;
 			break;
 
 	}
@@ -255,9 +288,9 @@ struct Token_Node *Parse(struct Token_Node * Token_Start)
 			Token_Now = Token_Now -> next;
 			continue;
 		}
-		float Reolt = Canclate_Reolt_From_Token(*Token_Now, *((Token_Now -> next) -> next), *(Token_Now -> next));
-		if(Reolt != -1 && Reolt != -2){
-			printf("%f\n", Reolt);
+		struct To_return Reolt = Canclate_Reolt_From_Token(*Token_Now, *((Token_Now -> next) -> next), *(Token_Now -> next));
+		if(Reolt.sucses == maths_sucses){
+			printf("%f\n", Reolt.number);
 			struct Token_Node *_ = ((Token_Now -> next) -> next) -> next;
 			printf("((Token_Now -> next) -> next) -> Token_start\n");
 			free(((Token_Now -> next) -> next) -> Token_start);
@@ -277,11 +310,11 @@ struct Token_Node *Parse(struct Token_Node * Token_Start)
 			printf("Done2\n");
 
 
-			sprintf((Token_Now -> Token_start), "%.3f", Reolt);
+			sprintf((Token_Now -> Token_start), "%.3f", Reolt.number);
 			//itoa(Reolt, (Token_Now -> Token_start), 10);
-		}else if(Reolt == -1){
+		}else if(Reolt.sucses == maths_invalid){
 			Token_Now = Token_Now -> next;
-		}else if(Reolt == -2){
+		}else if(Reolt.sucses == maths_Error){
 			free(Token_Now -> Token_start);
 			(Token_Now -> Token_start) = malloc (sizeof(char)*5);
 			(Token_Now -> Token_start) = "Error";
@@ -302,14 +335,14 @@ struct Token_Node *Parse(struct Token_Node * Token_Start)
 
 
 int main (int argc, char **argv){
-	
-	
+
+
 	// We are just geting started!
 	gtk_init(&argc, &argv);
 
 	// read the glade file
 	Builder = gtk_builder_new_from_file("glade/Main.glade");
-	
+
 	// some More Init stuff. You know
 	Main_Window = GTK_WIDGET(gtk_builder_get_object(Builder, "Main Window"));
 	Main_Top = GTK_WIDGET(gtk_builder_get_object(Builder, "Main Top"));
@@ -434,6 +467,127 @@ void show_Answer(char *The_Answer){
 
 //                                   ||
 // is thare a beter way to do this ? \/
+void on_Button_equals_clicked();
+void on_Screen_changed(){
+	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
+	int lenth = strlen(Screen_Text);
+	printf("lenth:%i\n", lenth);
+	char *output = malloc (sizeof (char) * (lenth + 100)); // +100 for some more spase
+	bool maches = false;
+	int output_i = 0;
+	int Screen_Text_i = 0;
+	struct Token_atrbutes _;
+	bool will_clear = false;
+	bool will_show_ans = false;
+
+
+	while (Screen_Text_i <= lenth)
+	{
+		printf("Screen_Text_i:%i\n", Screen_Text_i);
+		maches = false;
+		if(strncmp(Screen_Text + Screen_Text_i, "=", sizeof ("=") -1 ) == 0){
+			printf("plus not\n");
+			strcpy(output + output_i, plus_str);
+			output_i += sizeof(plus_str) - 1;
+			Screen_Text_i += sizeof ("*") - 1;
+      printf("size of:%i\n", sizeof ("*") - 1);
+			maches = true;
+		}
+		if(strncmp(Screen_Text + Screen_Text_i, " ", sizeof (" ") -1 ) == 0){
+			printf("space\n");
+			output_i += 0;
+			Screen_Text_i += 1;
+			maches = true;
+		}
+    if(strncmp(Screen_Text + Screen_Text_i, "a", sizeof ("a") -1 ) == 0){
+			printf("space\n");
+			output_i += 0;
+			Screen_Text_i += 1;
+			will_show_ans = true;
+			maches = true;
+		}
+		if(strncmp(Screen_Text + Screen_Text_i, "c", sizeof ("c") -1 ) == 0){
+			printf("space\n");
+			output_i += 0;
+			Screen_Text_i += 1;
+			will_clear = true;
+			maches = true;
+		}
+		if(strncmp(Screen_Text + Screen_Text_i, "*", sizeof ("*") -1 ) == 0){
+			printf("times\n");
+			strcpy(output + output_i, times_str);
+			output_i += sizeof(times_str) - 1;
+			Screen_Text_i += sizeof ("*") - 1;
+      printf("size of:%i\n", sizeof ("*") - 1);
+			//printf("strlen(times_str) is :%i\n", strlen(times_str));
+			maches = true;
+		}
+		if(strncmp(Screen_Text + Screen_Text_i, "/", sizeof ("/")) == 0){
+			printf("minus\n");
+			strcpy(output + output_i, divide_str);
+			output_i += sizeof(divide_str) -1 ;
+			Screen_Text_i += 1;
+			maches = true;
+		}
+		if(strncmp(Screen_Text + Screen_Text_i, "-", sizeof ("-")) == 0){
+			printf("minus\n");
+			strcpy(output + output_i, minus_str);
+			output_i += sizeof(minus_str) -1 ;
+			Screen_Text_i += 1;
+			maches = true;
+		}
+		if(strncmp(Screen_Text + Screen_Text_i, "%", sizeof ("%")) == 0){
+			printf("minus\n");
+			strcpy(output + output_i, mod_str);
+			output_i += sizeof(mod_str) -1 ;
+			Screen_Text_i += 1;
+			maches = true;
+		}
+		if(strncmp(Screen_Text + Screen_Text_i, "_", sizeof ("_")) == 0){
+			printf("minus not\n");
+			strcpy(output + output_i, minus_str);
+			output_i += sizeof(minus_str) -1 ;
+			Screen_Text_i += 1;
+			maches = true;
+		}
+
+		if(maches == false){
+			printf("to:%s\n", Screen_Text + Screen_Text_i);
+			strncpy(output + output_i, Screen_Text + Screen_Text_i, 1);
+			output_i += 1;
+			Screen_Text_i += 1;
+			maches = true;
+		}
+	}
+	printf("will_clear: %i\n", will_clear);
+	printf("will_show_ans: %i\n", will_show_ans);
+	if((lenth < 1) || will_clear){
+		gtk_widget_hide(Label_Equals);
+		gtk_widget_hide(Answer);
+	}else{
+		on_Button_equals_clicked();
+	}
+
+	if(!will_clear){
+		gtk_entry_set_text(GTK_ENTRY(Screen), output);
+	}else
+	{
+		gtk_entry_set_text(GTK_ENTRY(Screen), "");
+	}
+
+	if(will_show_ans){
+		printf("");
+		const char *Answer_Text = gtk_label_get_text(GTK_LABEL(Answer));
+		gtk_entry_set_text (GTK_ENTRY (Screen), Answer_Text);
+	}
+
+}
+
+void on_Screen_activate(){
+	//on_Screen_changed ();
+	on_Button_equals_clicked();
+}
+
 void on_Button_Dot_clicked(){
 	add_text_to_Screen(".");
 }
@@ -450,6 +604,10 @@ void on_Button_equals_clicked()
 	show_Answer(Resolt);
 }
 
+void on_Button_mod_clicked(){
+	add_text_to_Screen(mod_str);
+}
+
 void on_Button_Back_clicked()
 {
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
@@ -464,22 +622,22 @@ void on_Button_CE_clicked()
 
 void on_Button_divide_clicked()
 {
-	add_text_to_Screen("÷");
+	add_text_to_Screen(divide_str);
 }
 
 void on_Button_time_clicked()
 {
-	add_text_to_Screen("×");
+	add_text_to_Screen(times_str);
 }
 
 void on_Button_minus_clicked()
 {
-	add_text_to_Screen("−");
+	add_text_to_Screen(minus_str);
 }
 
 void on_Button_plus_clicked()
 {
-	add_text_to_Screen("+");
+	add_text_to_Screen(plus_str);
 }
 
 

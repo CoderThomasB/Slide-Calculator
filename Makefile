@@ -4,11 +4,11 @@ TARGET=slide-calculator.out
 # compiler
 CC=gcc
 # debug
-DEBUG=
+DEBUG=#-g
 # optimisation
-OPT= -pipe -Ofast
+OPT=-pipe -Ofast
 # warnings
-WARN=
+WARN=-Wextra
 
 PTHREAD=-pthread
 
