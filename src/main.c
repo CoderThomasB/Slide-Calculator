@@ -143,27 +143,27 @@ struct To_return Canclate_Reolt_From_Token(struct Token_Node Number1,struct Toke
 
 	// NOT FINISHED
 	if(Number1.Token_type != Number){
-		printf("Number1 not Number\n");
-		printf("Number1 is a %s\n", Get_Name_Of_Token_type (Number1.Token_type));
+		//printf("Number1 not Number\n");
+		//printf("Number1 is a %s\n", Get_Name_Of_Token_type (Number1.Token_type));
 		the_return.sucses = maths_invalid;
 		return the_return;
 	}
 	if(Number2.Token_type != Number){
-		printf("Number2 not Number\n");
-		printf("Number2 is a %s\n", Get_Name_Of_Token_type (Number2.Token_type));
+		//printf("Number2 not Number\n");
+		//printf("Number2 is a %s\n", Get_Name_Of_Token_type (Number2.Token_type));
 		the_return.sucses = maths_invalid;
 		return the_return;
 	}
 	if(The_Operator.Token_type == Number){
-		printf("The_Operator is Number\n");
-		printf("The_Operator is a %s\n", Get_Name_Of_Token_type (The_Operator.Token_type));
+		//printf("The_Operator is Number\n");
+		//printf("The_Operator is a %s\n", Get_Name_Of_Token_type (The_Operator.Token_type));
 		the_return.sucses = maths_invalid;
 		return the_return;
 	}
 
 
-	printf("Number1.Token_start: %s\n", Number1.Token_start);
-	printf("Number2.Token_start: %s\n", Number2.Token_start);
+	//printf("Number1.Token_start: %s\n", Number1.Token_start);
+	//printf("Number2.Token_start: %s\n", Number2.Token_start);
 
 
 	float int_Number1 = atof(Number1.Token_start);
@@ -171,13 +171,13 @@ struct To_return Canclate_Reolt_From_Token(struct Token_Node Number1,struct Toke
 
 	float int_Number2 = atof(Number2.Token_start);
 
-	printf("Number1: %i\n", int_Number1);
-	printf("Number2: %i\n", int_Number2);
+	//printf("Number1: %i\n", int_Number1);
+	//printf("Number2: %i\n", int_Number2);
 
 	switch (The_Operator.Token_type)
 		{
 		case Number:
-			printf("The_Operator is not Number\n");
+			//printf("The_Operator is not Number\n");
 			the_return.sucses = maths_invalid;
 			return the_return;
 			break;
@@ -290,24 +290,24 @@ struct Token_Node *Parse(struct Token_Node * Token_Start)
 		}
 		struct To_return Reolt = Canclate_Reolt_From_Token(*Token_Now, *((Token_Now -> next) -> next), *(Token_Now -> next));
 		if(Reolt.sucses == maths_sucses){
-			printf("%f\n", Reolt.number);
+			//printf("%f\n", Reolt.number);
 			struct Token_Node *_ = ((Token_Now -> next) -> next) -> next;
-			printf("((Token_Now -> next) -> next) -> Token_start\n");
+			//printf("((Token_Now -> next) -> next) -> Token_start\n");
 			free(((Token_Now -> next) -> next) -> Token_start);
-			printf("((Token_Now -> next) -> next)\n");
+			//printf("((Token_Now -> next) -> next)\n");
 			free(((Token_Now -> next) -> next));
-			printf("(Token_Now -> next) -> Token_start\n");
+			//printf("(Token_Now -> next) -> Token_start\n");
 			free((Token_Now -> next) -> Token_start);
-			printf("(Token_Now -> next)\n");
+			//printf("(Token_Now -> next)\n");
 			free((Token_Now -> next));
-			printf("Token_Now -> Token_start\n");
+			//printf("Token_Now -> Token_start\n");
 			free(Token_Now -> Token_start);
-			printf("Done\n");
+			//printf("Done\n");
 
 			(Token_Now -> next) = _;
 			(Token_Now -> Token_type) = Number;
 			(Token_Now -> Token_start) = malloc(sizeof (char) * 1000);
-			printf("Done2\n");
+			//printf("Done2\n");
 
 
 			sprintf((Token_Now -> Token_start), "%.3f", Reolt.number);
@@ -327,7 +327,7 @@ struct Token_Node *Parse(struct Token_Node * Token_Start)
 	Token_Now = Token_Start;
 	while ((Token_Now -> next) != NULL)
 	{
-		printf("%s\n", Token_Now -> Token_start);
+		//printf("%s\n", Token_Now -> Token_start);
 		Token_Now = Token_Now -> next;
 	}
   return Token_Start;
@@ -395,14 +395,24 @@ void on_window_main_destroy()
 	gtk_main_quit();
 }
 
+void button_pressed(){
+	gtk_entry_grab_focus_without_selecting(GTK_ENTRY(Screen));
+}
 
 void add_text_to_Screen(const gchar *input)
 {
+	int i = gtk_editable_get_position( GTK_EDITABLE(Screen) );
+	gtk_editable_insert_text(GTK_EDITABLE(Screen), input, sizeof (input), &i);
+	gtk_editable_set_position(GTK_EDITABLE(Screen), i);
+
+	/*int position = gtk_editable_get_position( GTK_EDITABLE(Screen) );
+	//printf("position: %i\n", position);
+	gtk_editable_set_position(GTK_EDITABLE(Screen), position+1);
 	// reads the charters of the Screen
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
 	
 	// Gets the lenth of the exseted output
-	int Output_Size = strlen(gtk_entry_get_text(GTK_ENTRY(Screen))) + strlen(input) + 1;
+	int Output_Size = strlen(gtk_entry_get_text(GTK_ENTRY(Screen))) + strlen(input) + 10;
 
 
 	// Crats a Bufer
@@ -413,19 +423,25 @@ void add_text_to_Screen(const gchar *input)
 
 	// a test for success!
 	if (text == NULL) {
-		printf("Memory not allocated.\n");
+		//printf("Memory not allocated.\n");
 		return;
 	}
 	
+	// set it to zero
 	memset(text, 0, Output_Size);
 	
-	// appends the Screen_Text
-	strcat(text, Screen_Text);
+	// appends the pre edter Screen_Text
+	strncat(text, Screen_Text, position);
 
 	// appends the input
 	strcat(text, input);
 
-	printf("OutPut:%s\n", text);
+	// adds the afder editer Screen_Text
+	strcat(text, Screen_Text + position + sizeof (input));
+
+	//printf("OutPut:%s\n", text);
+
+	gtk_editable_set_position(GTK_EDITABLE(Screen), position+2);
 
 	// writs the Buffer / output to the screen
 	gtk_entry_set_text(GTK_ENTRY(Screen), text);
@@ -434,7 +450,7 @@ void add_text_to_Screen(const gchar *input)
 	free(text);
 
 	// We Are Done !!!!
-	return;
+	return;*/
 }
 const char* Get_Name_Of_Token_type(enum Token_types Token_type){
 	switch (Token_type)
@@ -471,7 +487,7 @@ void on_Button_equals_clicked();
 void on_Screen_changed(){
 	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
 	int lenth = strlen(Screen_Text);
-	printf("lenth:%i\n", lenth);
+	//printf("lenth:%i\n", lenth);
 	char *output = malloc (sizeof (char) * (lenth + 100)); // +100 for some more spase
 	bool maches = false;
 	int output_i = 0;
@@ -483,68 +499,68 @@ void on_Screen_changed(){
 
 	while (Screen_Text_i <= lenth)
 	{
-		printf("Screen_Text_i:%i\n", Screen_Text_i);
+		//printf("Screen_Text_i:%i\n", Screen_Text_i);
 		maches = false;
 		if(strncmp(Screen_Text + Screen_Text_i, "=", sizeof ("=") -1 ) == 0){
-			printf("plus not\n");
+			//printf("plus not\n");
 			strcpy(output + output_i, plus_str);
 			output_i += sizeof(plus_str) - 1;
 			Screen_Text_i += sizeof ("*") - 1;
-      printf("size of:%i\n", sizeof ("*") - 1);
+      //printf("size of:%i\n", sizeof ("*") - 1);
 			maches = true;
 		}
 		if(strncmp(Screen_Text + Screen_Text_i, " ", sizeof (" ") -1 ) == 0){
-			printf("space\n");
+			//printf("space\n");
 			output_i += 0;
 			Screen_Text_i += 1;
 			maches = true;
 		}
     if(strncmp(Screen_Text + Screen_Text_i, "a", sizeof ("a") -1 ) == 0){
-			printf("space\n");
+			//printf("space\n");
 			output_i += 0;
 			Screen_Text_i += 1;
 			will_show_ans = true;
 			maches = true;
 		}
 		if(strncmp(Screen_Text + Screen_Text_i, "c", sizeof ("c") -1 ) == 0){
-			printf("space\n");
+			//printf("space\n");
 			output_i += 0;
 			Screen_Text_i += 1;
 			will_clear = true;
 			maches = true;
 		}
 		if(strncmp(Screen_Text + Screen_Text_i, "*", sizeof ("*") -1 ) == 0){
-			printf("times\n");
+			//printf("times\n");
 			strcpy(output + output_i, times_str);
 			output_i += sizeof(times_str) - 1;
 			Screen_Text_i += sizeof ("*") - 1;
-      printf("size of:%i\n", sizeof ("*") - 1);
+      //printf("size of:%i\n", sizeof ("*") - 1);
 			//printf("strlen(times_str) is :%i\n", strlen(times_str));
 			maches = true;
 		}
 		if(strncmp(Screen_Text + Screen_Text_i, "/", sizeof ("/")) == 0){
-			printf("minus\n");
+			//printf("minus\n");
 			strcpy(output + output_i, divide_str);
 			output_i += sizeof(divide_str) -1 ;
 			Screen_Text_i += 1;
 			maches = true;
 		}
 		if(strncmp(Screen_Text + Screen_Text_i, "-", sizeof ("-")) == 0){
-			printf("minus\n");
+			//printf("minus\n");
 			strcpy(output + output_i, minus_str);
 			output_i += sizeof(minus_str) -1 ;
 			Screen_Text_i += 1;
 			maches = true;
 		}
 		if(strncmp(Screen_Text + Screen_Text_i, "%", sizeof ("%")) == 0){
-			printf("minus\n");
+			//printf("minus\n");
 			strcpy(output + output_i, mod_str);
 			output_i += sizeof(mod_str) -1 ;
 			Screen_Text_i += 1;
 			maches = true;
 		}
 		if(strncmp(Screen_Text + Screen_Text_i, "_", sizeof ("_")) == 0){
-			printf("minus not\n");
+			//printf("minus not\n");
 			strcpy(output + output_i, minus_str);
 			output_i += sizeof(minus_str) -1 ;
 			Screen_Text_i += 1;
@@ -552,15 +568,15 @@ void on_Screen_changed(){
 		}
 
 		if(maches == false){
-			printf("to:%s\n", Screen_Text + Screen_Text_i);
+			//printf("to:%s\n", Screen_Text + Screen_Text_i);
 			strncpy(output + output_i, Screen_Text + Screen_Text_i, 1);
 			output_i += 1;
 			Screen_Text_i += 1;
 			maches = true;
 		}
 	}
-	printf("will_clear: %i\n", will_clear);
-	printf("will_show_ans: %i\n", will_show_ans);
+	//printf("will_clear: %i\n", will_clear);
+	//printf("will_show_ans: %i\n", will_show_ans);
 	if((lenth < 1) || will_clear){
 		gtk_widget_hide(Label_Equals);
 		gtk_widget_hide(Answer);
@@ -576,118 +592,138 @@ void on_Screen_changed(){
 	}
 
 	if(will_show_ans){
-		printf("");
+		//printf("");
 		const char *Answer_Text = gtk_label_get_text(GTK_LABEL(Answer));
 		gtk_entry_set_text (GTK_ENTRY (Screen), Answer_Text);
 	}
 
 }
-
+/*
 void on_Screen_activate(){
 	//on_Screen_changed ();
 	on_Button_equals_clicked();
 }
-
+*/
 void on_Button_Dot_clicked(){
+	button_pressed();
 	add_text_to_Screen(".");
 }
 
 void on_Button_Ans_clicked()
 {
+	button_pressed();
 	const gchar *Answer_Text = gtk_label_get_text(GTK_LABEL(Answer));
 	gtk_entry_set_text (GTK_ENTRY (Screen), Answer_Text);
+	gtk_editable_set_position(GTK_EDITABLE(Screen), -1);
 }
 
 void on_Button_equals_clicked()
 {
+	button_pressed();
 	char *Resolt = Calculate_Resolt();
 	show_Answer(Resolt);
 }
 
 void on_Button_mod_clicked(){
+	button_pressed();
 	add_text_to_Screen(mod_str);
 }
 
 void on_Button_Back_clicked()
 {
-	const char *Screen_Text = gtk_entry_get_text(GTK_ENTRY(Screen));
-
-	gtk_entry_set_text(GTK_ENTRY(Screen), Screen_Text);
+	button_pressed();
+	int posishon = gtk_editable_get_position(GTK_EDITABLE(Screen));
+	gtk_editable_delete_text(GTK_EDITABLE(Screen), posishon-1, posishon);
 }
 
 void on_Button_CE_clicked()
 {
+	button_pressed();
 	gtk_entry_set_text(GTK_ENTRY(Screen), "");
 }
 
 void on_Button_divide_clicked()
 {
+	button_pressed();
 	add_text_to_Screen(divide_str);
 }
 
 void on_Button_time_clicked()
 {
+	button_pressed();
 	add_text_to_Screen(times_str);
 }
 
 void on_Button_minus_clicked()
 {
+	button_pressed();
 	add_text_to_Screen(minus_str);
 }
 
 void on_Button_plus_clicked()
 {
+	button_pressed();
 	add_text_to_Screen(plus_str);
 }
 
 
 void on_Button_0_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("0");
 }
 
 void on_Button_1_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("1");
 }
 
 void on_Button_2_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("2");
 }
 
 void on_Button_3_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("3");
 }
 
 void on_Button_4_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("4");
 }
 
 void on_Button_5_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("5");
 }
 
 void on_Button_6_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("6");
 }
 
 void on_Button_7_clicked()
 {
 	// Can You See ME!
+	button_pressed();
 	add_text_to_Screen("7");
 }
 
 void on_Button_8_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("8");
 }
 
 void on_Button_9_clicked()
 {
+	button_pressed();
 	add_text_to_Screen("9");
 }
