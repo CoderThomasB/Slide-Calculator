@@ -20,11 +20,10 @@ GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
 LD=gcc
 LDFLAGS=$(PTHREAD) $(GTKLIB) -export-dynamic
 
-OBJS=    main.o
+all: build
 
-
-all: $(OBJS)
-	$(LD) -o $(TARGET) $(OBJS) $(LDFLAGS)
+build: main.o
+	$(LD) -o $(TARGET) main.o $(LDFLAGS)
 	echo "Done"
 
 main.o: src/main.c
@@ -33,10 +32,24 @@ main.o: src/main.c
 clean:
 	rm -f *.o $(TARGET)
 
-run: all
+run: build
 	./$(TARGET) 
 
-install: run
+install: build
+	#mkdir /etc/slide-calculator/ || echo "dir is thare"
+	#mkdir /etc/slide-calculator/glade/ || echo "dir is thare"
+	#cp ./remove.sh /etc/slide-calculator/
+	#cp ./glade/Main.glade /etc/slide-calculator/glade/
+	mkdir /usr/share/slide-calculator || echo "dir is thare"
+	cp ./remove.sh /usr/share/slide-calculator
+	mkdir /usr/share/slide-calculator/glade/ || echo "dir is thare"
+	cp ./glade/Main.glade /usr/share/slide-calculator/glade/
+
+	cp ./slide-calculator.out /usr/bin/slide-calculator
+
+remove:
+	rm -r /usr/share/slide-calculator
+	rm /usr/bin/slide-calculator
 
 #gtk:
 #	sudo apt-get install libgtk-3-dev

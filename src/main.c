@@ -341,7 +341,7 @@ int main (int argc, char **argv){
 	gtk_init(&argc, &argv);
 
 	// read the glade file
-	Builder = gtk_builder_new_from_file("glade/Main.glade");
+	Builder = gtk_builder_new_from_file("/usr/share/slide-calculator/glade/Main.glade");
 
 	// some More Init stuff. You know
 	Main_Window = GTK_WIDGET(gtk_builder_get_object(Builder, "Main Window"));
