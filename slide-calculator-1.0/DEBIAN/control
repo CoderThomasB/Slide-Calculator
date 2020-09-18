@@ -1,0 +1,8 @@
+Package: Slide-Calculator
+Package-Type: deb
+Version: 1.0
+Maintainer: Thomas Booker <tw.booker@outlook.com>
+Description: this is a calculator made for the slide desktop
+Priority: optional
+Architecture: amd64
+Homepage: https://github.com/CoderThomasB/Slide-Calculator
