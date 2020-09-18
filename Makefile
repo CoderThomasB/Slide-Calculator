@@ -1,5 +1,3 @@
-# change application name here (executable output name)
-TARGET=slide-calculator.out
 
 # compiler
 CC=gcc
@@ -22,33 +20,38 @@ LDFLAGS=$(PTHREAD) $(GTKLIB) -export-dynamic
 
 all: deb
 
-deb: build
+mkdir:
+	mkdir ./bin/ || echo "dir is thare"
+
 	mkdir ./slide-calculator-1.0/usr/ || echo "dir is thare"
 	mkdir ./slide-calculator-1.0/usr/bin/ || echo "dir is thare"
-	cp ./slide-calculator.out ./slide-calculator-1.0/usr/bin/slide-calculator
 
 	mkdir ./slide-calculator-1.0/usr/share/ || echo "dir is thare"
 	mkdir ./slide-calculator-1.0/usr/share/slide-calculator/ || echo "dir is thare"
 	mkdir ./slide-calculator-1.0/usr/share/slide-calculator/glade/ || echo "dir is thare"
+
+deb: mkdir build
+	cp ./bin/slide-calculator.out ./slide-calculator-1.0/usr/bin/slide-calculator
+
 	cp ./glade/Main.glade ./slide-calculator-1.0/usr/share/slide-calculator/glade/\
 
 	dpkg-deb --build ./slide-calculator-1.0/
 
-build: main.o
-	$(LD) -o $(TARGET) main.o $(LDFLAGS)
+build: mkdir main.o
+	$(LD) -o ./bin/slide-calculator.out ./bin/main.o $(LDFLAGS)
 	echo "Done"
 
-main.o: src/main.c
-	$(CC) -c $(CCFLAGS) src/main.c $(GTKLIB)  -o main.o
+main.o: mkdir src/main.c
+	$(CC) -c $(CCFLAGS) src/main.c $(GTKLIB)  -o ./bin/main.o
 	    
 clean:
 	rm -f *.o || echo ""
 	rm $(TARGET) || echo ""
 	rm -f ./slide-calculator-1.0/usr/ || echo ""
-	rm slide-calculator.out || echo ""
+	rm ./bin/slide-calculator.out || echo ""
 
 run: build
-	./$(TARGET) 
+	./bin/slide-calculator.out
 
 install: deb
 	dpkg -i slide-calculator-1.0.deb
