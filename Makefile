@@ -20,7 +20,19 @@ GTKLIB=`pkg-config --cflags --libs gtk+-3.0`
 LD=gcc
 LDFLAGS=$(PTHREAD) $(GTKLIB) -export-dynamic
 
-all: build
+all: deb
+
+deb: build
+	mkdir ./slide-calculator-1.0/usr/ || echo "dir is thare"
+	mkdir ./slide-calculator-1.0/usr/bin/ || echo "dir is thare"
+	cp ./slide-calculator.out ./slide-calculator-1.0/usr/bin/slide-calculator
+
+	mkdir ./slide-calculator-1.0/usr/share/ || echo "dir is thare"
+	mkdir ./slide-calculator-1.0/usr/share/slide-calculator/ || echo "dir is thare"
+	mkdir ./slide-calculator-1.0/usr/share/slide-calculator/glade/ || echo "dir is thare"
+	cp ./glade/Main.glade ./slide-calculator-1.0/usr/share/slide-calculator/glade/\
+
+	dpkg-deb --build ./slide-calculator-1.0/
 
 build: main.o
 	$(LD) -o $(TARGET) main.o $(LDFLAGS)
@@ -31,25 +43,17 @@ main.o: src/main.c
 	    
 clean:
 	rm -f *.o $(TARGET)
+	rm slide-calculator.out
 
 run: build
 	./$(TARGET) 
 
-install: build
-	#mkdir /etc/slide-calculator/ || echo "dir is thare"
-	#mkdir /etc/slide-calculator/glade/ || echo "dir is thare"
-	#cp ./remove.sh /etc/slide-calculator/
-	#cp ./glade/Main.glade /etc/slide-calculator/glade/
-	mkdir /usr/share/slide-calculator || echo "dir is thare"
-	cp ./remove.sh /usr/share/slide-calculator
-	mkdir /usr/share/slide-calculator/glade/ || echo "dir is thare"
-	cp ./glade/Main.glade /usr/share/slide-calculator/glade/
+install: deb
+	dpkg -i slide-calculator-1.0.deb
 
-	cp ./slide-calculator.out /usr/bin/slide-calculator
 
 remove:
-	rm -r /usr/share/slide-calculator
-	rm /usr/bin/slide-calculator
+	dpkg -r slide-calculator
 
 #gtk:
 #	sudo apt-get install libgtk-3-dev
