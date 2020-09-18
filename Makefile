@@ -42,8 +42,10 @@ main.o: src/main.c
 	$(CC) -c $(CCFLAGS) src/main.c $(GTKLIB)  -o main.o
 	    
 clean:
-	rm -f *.o $(TARGET)
-	rm slide-calculator.out
+	rm -f *.o || echo ""
+	rm $(TARGET) || echo ""
+	rm -f ./slide-calculator-1.0/usr/ || echo ""
+	rm slide-calculator.out || echo ""
 
 run: build
 	./$(TARGET) 
