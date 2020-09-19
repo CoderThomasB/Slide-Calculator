@@ -20,9 +20,7 @@ LDFLAGS=$(PTHREAD) $(GTKLIB) -export-dynamic
 
 all: deb
 
-mkdir:
-	mkdir ./bin/ || echo "dir is thare"
-
+mkdir-deb:
 	mkdir ./slide-calculator-1.0/usr/ || echo "dir is thare"
 	mkdir ./slide-calculator-1.0/usr/bin/ || echo "dir is thare"
 
@@ -30,10 +28,14 @@ mkdir:
 	mkdir ./slide-calculator-1.0/usr/share/slide-calculator/ || echo "dir is thare"
 	mkdir ./slide-calculator-1.0/usr/share/slide-calculator/glade/ || echo "dir is thare"
 
-deb: mkdir build
+mkdir:
+	mkdir ./bin/ || echo "dir is thare"
+
+
+deb: mkdir-deb build
 	cp ./bin/slide-calculator.out ./slide-calculator-1.0/usr/bin/slide-calculator
 
-	cp ./glade/Main.glade ./slide-calculator-1.0/usr/share/slide-calculator/glade/\
+	cp ./glade/Main.glade ./slide-calculator-1.0/usr/share/slide-calculator/glade/
 
 	dpkg-deb --build ./slide-calculator-1.0/
 
@@ -50,15 +52,25 @@ clean:
 	rm -f ./slide-calculator-1.0/usr/ || echo ""
 	rm ./bin/slide-calculator.out || echo ""
 
-run: build
-	./bin/slide-calculator.out
+run: install
+	slide-calculator
 
-install: deb
-	dpkg -i slide-calculator-1.0.deb
+run-deb: install-deb
+	slide-calculator
 
+install: build
+	sudo cp ./bin/slide-calculator.out /usr/bin/slide-calculator
+	sudo cp ./glade/Main.glade /usr/share/slide-calculator/glade/
+
+install-deb: deb
+	sudo dpkg -i slide-calculator-1.0.deb
+
+remove-deb:
+	sudo dpkg -r slide-calculator
 
 remove:
-	dpkg -r slide-calculator
+	sudo rm /usr/bin/slide-calculator
+	sudo rm -r /usr/share/slide-calculator
 
 #gtk:
 #	sudo apt-get install libgtk-3-dev
