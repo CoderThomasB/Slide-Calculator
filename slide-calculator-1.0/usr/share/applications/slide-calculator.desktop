@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Slide Calculator
+GenericName=Calculator
+Comment=Slide Calculator is a Calculator made to work whit the slide desktop
+Keywords=calculator;nubers;maths;math;
+
+
+Exec=slide-calculator
+Terminal=false
+StartupNotify=true
+Type=Application
+
+#Icon=slide-calculator
+Icon=gnome-calculator
