@@ -6,4 +6,4 @@ Description: This is a calculator made for the slide desktop
 Priority: optional
 Architecture: amd64
 Homepage: https://github.com/CoderThomasB/Slide-Calculator
-Dependencies: libgtk-3-0
+Dependencies: libgtk-3-0, libpangocairo-1.0, libpango-1.0, libatk-1.0, libcairo-gobject, libcairo, libgdk_pixbuf-2.0, libgio-2.0, libgobject-2.0, libglib-2.0, libpthread, libc
