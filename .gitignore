@@ -1,6 +1,6 @@
 *.o
 *.out
 *.deb
-slide-calculator-1.0/usr
+slide-calculator-1.0/usr/bin
 tags*
 src/tags*
